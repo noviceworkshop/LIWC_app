@@ -1,0 +1,17 @@
+
+data/data/model_ws/model_asbc_Att-0_BiLSTM-cross-2-500_batch128-run1.meta
+data/data/model_ws/model_asbc_Att-0_BiLSTM-cross-2-500_batch128-run1.index
+data/data/model_ws/model_asbc_Att-0_BiLSTM-cross-2-500_batch128-run1.data-00000-of-00001
+data/data/model_pos/model_asbc_Att-0_BiLSTM-2-500_batch256-run1.meta
+data/data/model_pos/model_asbc_Att-0_BiLSTM-2-500_batch256-run1.index
+data/data/model_pos/model_asbc_Att-0_BiLSTM-2-500_batch256-run1.data-00000-of-00001
+data/data/model_pos/label_list.txt
+data/data/model_ner/pos_list.txt
+data/data/model_ner/model_ontochinese_Att-0_BiLSTM-2-500_batch128-run1.meta
+data/data/model_ner/model_ontochinese_Att-0_BiLSTM-2-500_batch128-run1.index
+data/data/model_ner/model_ontochinese_Att-0_BiLSTM-2-500_batch128-run1.data-00000-of-00001
+data/data/model_ner/label_list.txt
+data/data/embedding_word/vector_list.npy
+data/data/embedding_word/token_list.npy
+data/data/embedding_character/vector_list.npy
+data/data/embedding_character/token_list.npy
