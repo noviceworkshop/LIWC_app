@@ -167,6 +167,7 @@ class GUIDemo(Frame):
             self.ws = WS(mydir)
             #self.wordseg = Wordseg(batch_size=64, device="cpu", embedding='w2v', elmo_use_cuda=False, mode="TW")
             self.CkipText["text"] = "--- CkipTagger 初始化成功 ---"
+            self.CkipText2["text"] = f"路徑:{mydir}"
             self.wordseg_button['state'] = 'disabled'
         except:
             self.CkipText["text"] = "Error: CkipTagger 初始化失敗"

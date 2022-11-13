@@ -8,6 +8,7 @@ import codecs
 from tkinter import *
 import pandas as pd
 from tkinter import filedialog
+import tkinter.messagebox
 from openpyxl import load_workbook
 import string
 import platform
@@ -78,6 +79,7 @@ class GUIDemo(Frame):
             # path = path.replace("/", "\\")
             self.CkipText["text"] = "--- 設定CKIP資料夾為 ---"
             self.CkipText2["text"] = f"路徑:{path}"
+            tkinter.messagebox.showinfo("CKIP設定",  "initialize 成功!")
         except:
             self.CkipText["text"] = "Error: 初始化CKIP資料夾失敗"
 
@@ -184,39 +186,44 @@ class GUIDemo(Frame):
             total = 0
             if filename[-5:] == '.xlsx':
                 df = pd.read_excel(filename,engine='openpyxl')
+                basename, filename = os.path.split(filename)
+                freq_df = df.copy()
                 if not self.assert_msg(column_idx <= df.shape[1], "Invalid column index "):
                         return
                 tmp_txts = []
                 tmp_rows = []
-                for row in range(0, df.shape[1]):
+                for row in range(0, df.shape[0]):
                     text = df.iloc[row,column_idx]
-                    if text is None:
+                    if type(text)!=str:
                         continue
                     text = text.replace('\r\n', '')
                     text = text.replace('\n', '')
                     tmp_txts.append(text)
                     tmp_rows.append(row)
                 seg_txts = self.ws(tmp_txts)
+                print('finish seg: ',len(seg_txts))
                 pos_txts = self.pos(seg_txts)
+                print('finish pos: ' , len(pos_txts))
                 for row, text in zip(tmp_rows, seg_txts):
                     text = ' '.join(text)
                     text = replacing(self.replacements, text)
                     df.loc[row,'wseg']=text    
-                basename, filename = os.path.split(filename)
+                
                 os.makedirs(os.path.join(basename, 'result'), exist_ok=True)
                 outname = os.path.join(basename, 'result', 'fmt_'+filename)
                 df.to_excel(outname,index=False)
-
-                #frequency
-                freq_df = df.copy()
-                freq_df[dict(self.pos_list).values()]=0
+                print('seg exported')
+                #####frequency
+                del df
+                freq_df[list(dict(self.pos_list).values())]=0
                 for row, pos in zip(tmp_rows, pos_txts):
                     pos= [dict(self.pos_list)[i] for i in pos if i not in ['WHITESPACE','DOTCATEGORY']]
                     c = Counter(pos)
                     freq = dict([(i, c[i] / len(pos) * 100.0) for i in c])
                     for k,v in freq.items():
-                        freq_df.loc[0,k]=v
-                freq_df.to_excel(os.path.join(basename,'result',filename[:-5]+'frequency.xlsx'),index=False)
+                        freq_df.loc[row,k]=v
+                freq_df.to_excel(os.path.join(basename,'result',filename[:-5]+'_frequency.xlsx'),index=False)
+                print('pos exported')
                 donefile.append(os.path.join('result', 'fmt_'+filename))
                 self.displayText["text"] = "---- Output File ----\n" + '\n'.join(donefile)
             elif filename[-4:] == '.txt':
