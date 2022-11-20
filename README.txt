@@ -5,3 +5,6 @@
 2.選擇文字或excel資料夾 (testing_material有範例可以用)
 3.點選開始處理
 **範例xlsx文字量大，跑大約30~60秒是正常的
+
+
+pyinstaller -F --onefile   .\segandformat.py --add-data ".\.venv\Lib\site-packages\tensorflow\python\_pywrap_tensorflow_internal.pyd;."
