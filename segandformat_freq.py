@@ -2,25 +2,20 @@ import os
 import re
 import sys
 import csv
-import json
 import glob
 import time
 import codecs
 from tkinter import *
+import pandas as pd
 from tkinter import filedialog
+import tkinter.messagebox
 from openpyxl import load_workbook
 import string
-
-# Suppress as many warnings as possible
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
-from tensorflow.python.util import deprecation
-deprecation._PRINT_DEPRECATION_WARNINGS = False
-import tensorflow as tf
-tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+import platform
+from collections import Counter
+is_windows = platform.system() == 'Windows'
 
 from ckiptagger import data_utils, construct_dictionary, WS, POS, NER
-
-#from pywordseg import *
 
 def replacing(candidates, text):
     for candidate in candidates:
@@ -61,42 +56,34 @@ class GUIDemo(Frame):
         # self.replacements = list(csv.reader(open("convert.tsv"), delimiter='\t'))
         # self.pos_list = list(csv.reader(open("statistics.tsv"), delimiter='\t'))
         self.replacements = [['。', '.'], ['，', ','], ['、', ','], ['；', ';'], ['：', ':'], ['「', '"'], ['」', '"'], ['『', '"'], ['』', '"'], ['（', '('], ['）', ')'], ['【', '('], ['】', ')'], ['？', '?'], ['！', '!'], ['──', '-'], ['─', '-'], ['……', '…'], ['—', '-'], ['＃', '#'], ['＄', '$'], ['％', '%'], ['＆', '&'], ['＊', '*'], ['＋', '+'], ['／', '/'], ['＜', '<'], ['＝', '='], ['＞', '>'], ['^', '^'], ['﹍', '_'], ['～', '~'], ['\u3000', ' ']]
-        #self.pos_list = [['A', 'c_A'], ['Caa', 'c_Caa'], ['Cab', 'c_Cab'], ['Cba', 'c_Cba'], ['Cbb', 'c_Cbb'], ['Da', 'c_Da'], ['Dfa', 'c_Dfa'], ['Dfb', 'c_Dfb'], ['Di', 'c_Di'], ['Dk', 'c_Dk'], ['D', 'c_D'], ['Na', 'c_Na'], ['Nb', 'c_Nb'], ['Nc', 'c_Nc'], ['Ncd', 'c_Ncd'], ['Nd', 'c_Nd'], ['Neu', 'c_Neu'], ['Nes', 'c_Nes'], ['Nep', 'c_Nep'], ['Neqa', 'c_Neqa'], ['Neqb', 'c_Neqb'], ['Nf', 'c_Nf'], ['Ng', 'c_Ng'], ['Nh', 'c_Nh'], ['Nv', 'c_Nv'], ['I', 'c_I'], ['P', 'c_P'], ['T', 'c_T'], ['VA', 'c_VA'], ['VAC', 'c_VAC'], ['VB', 'c_VB'], ['VC', 'c_VC'], ['VCL', 'c_VCL'], ['VD', 'c_VD'], ['VE', 'c_VE'], ['VF', 'c_VF'], ['VG', 'c_VG'], ['VH', 'c_VH'], ['VHC', 'c_VHC'], ['VI', 'c_VI'], ['VJ', 'c_VJ'], ['VK', 'c_VK'], ['VL', 'c_VL'], ['V_2', 'c_V_2'], ['DE', 'c_DE'], ['SHI', 'c_SHI'], ['FW', 'c_FW'], ['COMMACATEGORY', 'c_comma'], ['DASHCATEGORY', 'c_dash'], ['ETCCATEGORY', 'c_etc'], ['EXCLAMATIONCATEGORY', 'c_exclam'], ['PARENTHESISCATEGORY', 'c_parenth'], ['PAUSECATEGORY', 'c_pause'], ['PERIODCATEGORY', 'c_period'], ['QUESTIONCATEGORY', 'c_qmark'], ['COLONCATEGORY', 'c_colon'], ['SEMICOLONCATEGORY', 'c_semic'], ['SPCHANGECATEGORY', 'c_sp']]
-        #self.comma_dict = {'COMMACATEGORY': 'c_comma', 'DASHCATEGORY': 'c_dash', 'ETCCATEGORY': 'c_etc', 'EXCLAMATIONCATEGORY': 'c_exclam', 'PARENTHESISCATEGORY': 'c_parenth', 'PAUSECATEGORY': 'c_pause', 'PERIODCATEGORY': 'c_period', 'QUESTIONCATEGORY': 'c_qmark', 'COLONCATEGORY': 'c_colon', 'SEMICOLONCATEGORY': 'c_semic', 'SPCHANGECATEGORY': 'c_sp'}
+        self.pos_list = [['A', 'c_A'], ['Caa', 'c_Caa'], ['Cab', 'c_Cab'], ['Cba', 'c_Cba'], ['Cbb', 'c_Cbb'], ['Da', 'c_Da'], ['Dfa', 'c_Dfa'], ['Dfb', 'c_Dfb'], ['Di', 'c_Di'], ['Dk', 'c_Dk'], ['D', 'c_D'], ['Na', 'c_Na'], ['Nb', 'c_Nb'], ['Nc', 'c_Nc'], ['Ncd', 'c_Ncd'], ['Nd', 'c_Nd'], ['Neu', 'c_Neu'], ['Nes', 'c_Nes'], ['Nep', 'c_Nep'], ['Neqa', 'c_Neqa'], ['Neqb', 'c_Neqb'], ['Nf', 'c_Nf'], ['Ng', 'c_Ng'], ['Nh', 'c_Nh'], ['Nv', 'c_Nv'], ['I', 'c_I'], ['P', 'c_P'], ['T', 'c_T'], ['VA', 'c_VA'], ['VAC', 'c_VAC'], ['VB', 'c_VB'], ['VC', 'c_VC'], ['VCL', 'c_VCL'], ['VD', 'c_VD'], ['VE', 'c_VE'], ['VF', 'c_VF'], ['VG', 'c_VG'], ['VH', 'c_VH'], ['VHC', 'c_VHC'], ['VI', 'c_VI'], ['VJ', 'c_VJ'], ['VK', 'c_VK'], ['VL', 'c_VL'], ['V_2', 'c_V_2'], ['DE', 'c_DE'], ['SHI', 'c_SHI'], ['FW', 'c_FW'], ['COMMACATEGORY', 'c_comma'], ['DASHCATEGORY', 'c_dash'], ['ETCCATEGORY', 'c_etc'], ['EXCLAMATIONCATEGORY', 'c_exclam'], ['PARENTHESISCATEGORY', 'c_parenth'], ['PAUSECATEGORY', 'c_pause'], ['PERIODCATEGORY', 'c_period'], ['QUESTIONCATEGORY', 'c_qmark'], ['COLONCATEGORY', 'c_colon'], ['SEMICOLONCATEGORY', 'c_semic'], ['SPCHANGECATEGORY', 'c_sp']]
+        self.comma_dict = {'COMMACATEGORY': 'c_comma', 'DASHCATEGORY': 'c_dash', 'ETCCATEGORY': 'c_etc', 'EXCLAMATIONCATEGORY': 'c_exclam', 'PARENTHESISCATEGORY': 'c_parenth', 'PAUSECATEGORY': 'c_pause', 'PERIODCATEGORY': 'c_period', 'QUESTIONCATEGORY': 'c_qmark', 'COLONCATEGORY': 'c_colon', 'SEMICOLONCATEGORY': 'c_semic', 'SPCHANGECATEGORY': 'c_sp'}
         self.column_titles = get_titles(1000)
-        self.wordseg_root = None
-        self.wordseg_dict = None
-        self.wordseg = None
-#        self.CkipText["text"] = "--- Pywordseg 初始化中 ---"
-        self.CkipText["text"] = "--- CkipTagger 尚未初始化 ---"
-        # try:
-        #     self.ws = WS("./data")
-        #     #self.wordseg = Wordseg(batch_size=64, device="cpu", embedding='w2v', elmo_use_cuda=False, mode="TW")
-        #     self.CkipText["text"] = "--- CkipTagger 初始化成功 ---"
-        #     #self.CkipText["text"] = "--- Pywordseg 初始化成功 ---"
-        # except:
-        #     self.CkipText["text"] = "Error: CkipTagger 初始化失敗"
-        #     #self.CkipText["text"] = "Error: Pywordseg 初始化失敗"
+        self.ws_root = None
+        self.ws = None
+        self.pos = None
 
-    def set_wordseg_dict(self):
-        if self.wordseg_dict is not None:
-            self.wordseg_dict = None
-            self.CkipText2["text"] = "--- 清除Pywordseg字典檔 ---"
-        path = filedialog.askopenfilename(initialdir=os.getcwd())
+    def set_ckip_root(self):
+        path = filedialog.askdirectory(initialdir=os.getcwd())
         if len(path) == 0:
             return
-        self.wordseg_root = path
+        self.ws_root = path
+        self.ws = path
+        self.CkipText["text"] = "--- CkipTagger 初始化中 ---"
         try:
-            assert os.path.exists(path)
-            path = path.replace("/", "\\")
-            self.wordseg_dict = construct_dictionary(json.load(open(path)))
-            self.CkipText["text"] = "--- 設定Pywordseg字典檔為 ---"
-            self.CkipText2["text"] = path
+            self.ws = WS(path)
+            try:
+                self.pos = POS(path)
+            except:
+                "Error: POS失敗，再按一次"
+            # path = path.replace("/", "\\")
+            self.CkipText["text"] = "--- 設定CKIP資料夾為 ---"
+            self.CkipText2["text"] = f"路徑:{path}"
+            tkinter.messagebox.showinfo("CKIP設定",  "initialize 成功!")
         except:
-            self.CkipText["text"] = "Warning: 字典檔讀取錯誤"
+            self.CkipText["text"] = "Error: 初始化CKIP資料夾失敗"
 
-    def download_model(self):
-        data_utils.download_data("./")
+
 
     def detect_coding(self, filename):
         candidates = ['utf-8', 'cp950', 'big5-hkscs', 'utf-16']
@@ -157,20 +144,6 @@ class GUIDemo(Frame):
         #outnames = [os.path.join("result", "fmt_"+filename) for filename in filenames]
         self.displayText["text"] = "---- Input File ----\n" + "\n".join(filenames)
         self.displayText2["text"] = ""
-    
-    def choose_model_txt(self):
-        mydir = filedialog.askdirectory(initialdir=os.getcwd())
-        # self.CkipText["text"] = "--- CkipTagger 初始化中 ---"
-        if len(mydir) == 0:
-            return
-        try:
-            self.ws = WS(mydir)
-            #self.wordseg = Wordseg(batch_size=64, device="cpu", embedding='w2v', elmo_use_cuda=False, mode="TW")
-            self.CkipText["text"] = "--- CkipTagger 初始化成功 ---"
-            self.CkipText2["text"] = f"路徑:{mydir}"
-            self.wordseg_button['state'] = 'disabled'
-        except:
-            self.CkipText["text"] = "Error: CkipTagger 初始化失敗"
 
     def assert_msg(self, cond, text):
         if cond:
@@ -190,52 +163,67 @@ class GUIDemo(Frame):
         else:
             self.displayText2["text"] = "Unknown filetype " + str(type(self.fin)) + ": " + str(self.fin)
             return
-        done_seg = False #(self.done_variable.get() == "Yes")
+        # done_seg = (self.done_variable.get() == "Yes")
+        done_seg = False
         if self.ws is None and not done_seg:
- #       if self.wordseg is None and not done_seg:
-            #self.displayText2["text"] = "Error: Pywordseg 初始化未完成或失敗"
-            self.displayText2["text"] = "Error: CkipTagger WS 初始化未完成或失敗"
+            if self.ws_root is None:
+                self.displayText2["text"] = "Error: CKIP 資料夾未設定"
+            else:
+                self.displayText2["text"] = "Error: CKIP 初始化未完成或失敗"
             return
         donefile = []
+        csv_list = []
         column = self.column_entry.get().upper()
         # done_seg = False
         if not self.assert_msg(column in self.column_titles, "Unknown column " + column):
             return
-        column_idx = self.column_titles[column]
+        column_idx = self.column_titles[column]-1
+        column_name = ['c_filename']
+        column_name.extend(dict(self.pos_list).values())
+        df = pd.DataFrame(columns=column_name)
         for idx, filename in enumerate(files):
+            count = {}
+            total = 0
             if filename[-5:] == '.xlsx':
-                wb = load_workbook(filename)
-                for sheetnames in wb.sheetnames:
-                    ws = wb[sheetnames]
-                    if not self.assert_msg(column_idx <= ws.max_column, "Invalid column index (%d > max column %d)" % (column_idx, ws.max_column)):
-                        return
-                    ws.insert_cols(column_idx+1)
-                    tmp_txts = []
-                    tmp_rows = []
-                    for row in range(1, ws.max_row + 1):
-                        text = ws.cell(row, column_idx).value
-                        if text is None:
-                            continue
-                        text = str(text)
-                        #if not done_seg:
-                        #text = self.wordseg.cut([text], merge_dict=self.wordseg_dict)[0]
-                        text = text.replace('\r\n', '')
-                        # text = re.sub(r"(\r\n)+", '\r\n', text)
-                        # text = re.sub(r"\n+", '\n', text)
-                        text = text.replace('\n', '')
-                        tmp_txts.append(text)
-                        tmp_rows.append(row)
-                    seg_txts = self.ws(tmp_txts)
-                    # seg_txts = self.wordseg.cut(tmp_txts, merge_dict=self.wordseg_dict)
-                    for row, text in zip(tmp_rows, seg_txts):
-                        text = ' '.join(text)
-                        text = replacing(self.replacements, text)
-                        #text = re.sub(r"\(\w+\)", '', text)
-                        ws.cell(row, column_idx+1).value = text
+                df = pd.read_excel(filename,engine='openpyxl')
                 basename, filename = os.path.split(filename)
+                freq_df = df.copy()
+                if not self.assert_msg(column_idx <= df.shape[1], "Invalid column index "):
+                        return
+                tmp_txts = []
+                tmp_rows = []
+                for row in range(0, df.shape[0]):
+                    text = df.iloc[row,column_idx]
+                    if type(text)!=str:
+                        continue
+                    text = text.replace('\r\n', '')
+                    text = text.replace('\n', '')
+                    tmp_txts.append(text)
+                    tmp_rows.append(row)
+                seg_txts = self.ws(tmp_txts)
+                print('finish seg: ',len(seg_txts))
+                pos_txts = self.pos(seg_txts)
+                print('finish pos: ' , len(pos_txts))
+                for row, text in zip(tmp_rows, seg_txts):
+                    text = ' '.join(text)
+                    text = replacing(self.replacements, text)
+                    df.loc[row,'wseg']=text    
+                
                 os.makedirs(os.path.join(basename, 'result'), exist_ok=True)
                 outname = os.path.join(basename, 'result', 'fmt_'+filename)
-                wb.save(outname)
+                df.to_excel(outname,index=False)
+                print('seg exported')
+                #####frequency
+                del df
+                freq_df[list(dict(self.pos_list).values())]=0
+                for row, pos in zip(tmp_rows, pos_txts):
+                    pos= [dict(self.pos_list)[i] for i in pos if i not in ['WHITESPACE','DOTCATEGORY']]
+                    c = Counter(pos)
+                    freq = dict([(i, c[i] / len(pos) * 100.0) for i in c])
+                    for k,v in freq.items():
+                        freq_df.loc[row,k]=v
+                freq_df.to_excel(os.path.join(basename,'result',filename[:-5]+'_frequency.xlsx'),index=False)
+                print('pos exported')
                 donefile.append(os.path.join('result', 'fmt_'+filename))
                 self.displayText["text"] = "---- Output File ----\n" + '\n'.join(donefile)
             elif filename[-4:] == '.txt':
@@ -247,27 +235,29 @@ class GUIDemo(Frame):
                 os.makedirs(os.path.join(basename, 'result'), exist_ok=True)
                 outname = os.path.join(basename, 'result', 'fmt_'+filename)
                 fout = open(outname, 'w', encoding='utf-8-sig', newline='\n')
-
                 tmp_txts = []
-                #tmp_rows = []
                 for line in fin:
-                    #if not done_seg:
-                    #line = self.wordseg.cut([line], merge_dict=self.wordseg_dict)[0]
                     line = line.replace('\r\n', '')
-                    # line = re.sub(r"(\r\n)+", '\r\n', line)
-                    # line = re.sub(r"\n+", '\n', line)
-                    # line = line.replace('\n\n', '\n')
                     line = line.replace('\n', '')
                     tmp_txts.append(line)
-                    #tmp_rows.append(row)
-#                seg_txts = self.wordseg.cut(tmp_txts, merge_dict=self.wordseg_dict)
                 seg_txts = self.ws(tmp_txts)
+                pos_txt = self.pos(seg_txts)[0]
                 for line in seg_txts:
                     line = ' '.join(line)
                     line = replacing(self.replacements, line)
                     line = re.sub(r"(: | : )",' : ',line)
                     fout.write(line.strip()+'\n')
                 donefile.append(os.path.join('result', 'fmt_'+filename))
+                pos_txt = [dict(self.pos_list)[i] for i in pos_txt if i not in ['WHITESPACE','DOTCATEGORY']]
+                c = Counter(pos_txt)
+                freq=dict(zip(dict(self.pos_list).values(),[0]*len(self.pos_list)))        
+                for i in c:
+                    freq[i]=c[i]/len(pos_txt)* 100.0
+                    # print(c[i],i,freq[i])
+                    freq['c_filename'] = filename
+                df = df.append(freq,ignore_index=True)
+                df.to_excel(os.path.join(basename,'result','txt_frequency.xlsx'),index=False)
+
                 self.displayText["text"] = "---- Output File ----\n" + '\n'.join(donefile)
         period = time.time() - start
         self.displayText2["text"] = "處理完成 (in %.3f s)"%period
@@ -282,18 +272,14 @@ class GUIDemo(Frame):
         self.gap = Label(self, width=5, height=1)
         self.gap.grid(row=row, column=0)
 
-        self.wordseg_button = Button(self, width=20, height=1)
-        # self.wordseg_button["text"] = "下載 CkipTagger 模型檔" # v1 小路
-        self.wordseg_button["text"] = "導入 CkipTagger 模型檔" 
-        #self.wordseg_button["text"] = "導入字典檔"
-        self.wordseg_button.grid(row=row, column=1, columnspan=2)
-        self.wordseg_button["command"] = self.choose_model_txt
-        #self.wordseg_button["command"] = self.set_wordseg_dict
+        self.ckip_button = Button(self, width=20, height=1)
+        self.ckip_button["text"] = "設定CKIP資料夾"
+        self.ckip_button.grid(row=row, column=1, columnspan=2)
+        self.ckip_button["command"] = self.set_ckip_root
         row += 1
 
         self.CkipText = Label(self)
-        self.CkipText["text"] = "--- CkipTagger 尚未初始化 ---"
-        #self.CkipText["text"] = "--- Pywordseg 尚未初始化 ---"
+        self.CkipText["text"] = "--- CKIP資料夾 未設定 ---"
         self.CkipText.grid(row=row, column=0, columnspan=7)
         row += 1
         self.CkipText2 = Label(self)
@@ -350,12 +336,12 @@ class GUIDemo(Frame):
         row += 1
         
 
-        #self.done_label = Label(self, text='是否已斷詞過')
-        #self.done_label.grid(row=row, column=1)
-        #self.done_variable = StringVar(self, value='No')
-        #self.done_segmt = OptionMenu(self, self.done_variable, "Yes", "No")
-        #self.done_segmt.grid(row=row, column=2)
-        #row += 1
+        self.done_label = Label(self, text='是否已斷詞過')
+        self.done_label.grid(row=row, column=1)
+        self.done_variable = StringVar(self, value='No')
+        self.done_segmt = OptionMenu(self, self.done_variable, "Yes", "No")
+        self.done_segmt.grid(row=row, column=2)
+        row += 1
                 
         self.displayText3 = Label(self)
         self.displayText3["text"] = ""
@@ -379,7 +365,6 @@ class GUIDemo(Frame):
         row += 1
         
 if __name__ == '__main__':
-    root = Tk(className=" CkipTagger GUI Tool ")
-    #root = Tk(className=" Pywordseg GUI Tool ")
+    root = Tk(className=" Freq & CKIP Format GUI Tool ")
     app = GUIDemo(master=root)
     app.mainloop()

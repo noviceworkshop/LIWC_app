@@ -1,0 +1,9 @@
+
+data/
+.ipynb_checkpoints/
+TEST/
+!TEST/new
+__pycache__/segandformat_freq.cpython-36.pyc
+build/
+dist/
+segandformat_freq.spec
