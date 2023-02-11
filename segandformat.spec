@@ -8,7 +8,7 @@ a = Analysis(
     ['segandformat.py'],
     pathex=[],
     binaries=[],
-    datas=[('.\\.venv\\Lib\\site-packages\\tensorflow\\python\\_pywrap_tensorflow_internal.pyd', '.')],
+    datas=[('.\\LIWC_env\\Lib\\site-packages\\tensorflow\\python\\_pywrap_tensorflow_internal.pyd', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
