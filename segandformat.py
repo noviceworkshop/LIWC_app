@@ -2,7 +2,9 @@ from tkinter import *
 from tkinter import filedialog
 from GUI import *
 import ctypes
-ctypes.windll.shcore.SetProcessDpiAwareness(1)
+import platform
+if platform.system=='Windows':
+    ctypes.windll.shcore.SetProcessDpiAwareness(1)
         
 if __name__ == '__main__':
     root = Tk()
