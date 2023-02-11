@@ -181,9 +181,7 @@ class GUIDemo(Frame):
         if not self.assert_msg(column in self.column_titles, "Unknown column " + column):
             return False
         column_idx = self.column_titles[column]-1
-        column_name = ['c_filename']
-        column_name.extend(dict(self.pos_list).values())
-        df = pd.DataFrame(columns=column_name)
+        
         for idx, filename in enumerate(file_list):
             df = pd.read_excel(filename) #xls uses xlrd, xlsx uses openpyxl
             basename, filename = os.path.split(filename)
@@ -211,8 +209,8 @@ class GUIDemo(Frame):
                 filename =filename[:-4]+'_xls.xlsx' #make the save file xlsx
             filename = f"fmt_seg_{column}_{filename}"
             outname = os.path.join(basename, 'result', filename)
-            print(outname)
             df.to_excel(outname,index=False)
+            donefile.append(os.path.join('result', filename))
             print('seg exported')
             del df
 
@@ -230,11 +228,14 @@ class GUIDemo(Frame):
                         freq_df.loc[row,k]=v
                 freq_df.to_excel(os.path.join(basename,'result',filename[:-5]+'_frequency.xlsx'),index=False)
                 print('pos exported')
-            donefile.append(os.path.join('result', 'fmt_'+filename))
+            donefile.append(os.path.join('result', filename[:-5]+'_frequency.xlsx'))
         return donefile
 
 
     def process_txt(self,file_list):
+        column_name = ['c_filename']
+        column_name.extend(dict(self.pos_list).values())
+        df = pd.DataFrame(columns=column_name)
         donefile = []
         for idx, filename in enumerate(file_list):
             codec = self.detect_coding(filename)
@@ -269,6 +270,7 @@ class GUIDemo(Frame):
                     freq['c_filename'] = filename
                 df = df.append(freq,ignore_index=True)
                 df.to_excel(os.path.join(basename,'result','txt_frequency.xlsx'),index=False)
+                donefile.append(os.path.join('result', 'txt_frequency.xlsx'))
         return donefile
 
                 
