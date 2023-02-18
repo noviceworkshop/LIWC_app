@@ -8,5 +8,7 @@ dist/
 segandformat_freq.spec
 playground_data/
 LIWC_env/
-playground_data/txt/result/fmt_C0011cha.txt
 segandformat.spec
+segandformat_freq.spec
+.DS_Store
+__pycache__/

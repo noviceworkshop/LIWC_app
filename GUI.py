@@ -186,6 +186,7 @@ class GUIDemo(Frame):
             df = pd.read_excel(filename) #xls uses xlrd, xlsx uses openpyxl
             basename, filename = os.path.split(filename)
             freq_df = df.copy()
+            df.insert(column_idx+1, f'seg_{column}', "")
             if not self.assert_msg(column_idx <= df.shape[1], "column index out of range"):
                     return False
             tmp_txts = []
