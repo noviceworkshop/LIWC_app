@@ -9,3 +9,5 @@
 for mac需要先在terminal跑下述程式碼
 add chmod +x ./NAME_OF_THE_FILE to code
 才能把下載的檔案改為可執行檔
+
+pyinstaller -F --onefile   .\segandformat.py --add-data ".\LIWC_env\Lib\site-packages\tensorflow\python\_pywrap_tensorflow_internal.pyd;."
