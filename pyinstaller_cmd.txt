@@ -1,0 +1,5 @@
+Window
+pyinstaller -F --onefile   .\segandformat.py --add-data ".\LIWC_env\Lib\site-packages\tensorflow\python\_pywrap_tensorflow_internal.pyd;."
+
+Mac
+pyinstaller -F --onefile   ./segandformat.py  --add-data "./LIWC_env/lib/python3.9/site-packages/tensorflow/python/pywrap_tensorflow_internal.py:."

@@ -5,10 +5,10 @@ block_cipher = None
 
 
 a = Analysis(
-    ['segandformat.py'],
+    ['.segandformat.py'],
     pathex=[],
     binaries=[],
-    datas=[('./LIWC_env/lib/python3.9/site-packages/tensorflow/python/pywrap_tensorflow_internal.py', '.')],
+    datas=[('.\\LIWC_env\\lib\\python3.9\\tensorflow\\python\\_pywrap_tensorflow_internal.pyd', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -28,7 +28,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='segandformat',
+    name='.segandformat',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
